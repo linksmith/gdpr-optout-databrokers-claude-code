@@ -1,0 +1,13 @@
+# Personal data - NEVER commit!
+.env
+
+# Database contains submission records
+data/submissions.db
+data/submissions.db-journal
+
+# Screenshots may contain personal info
+data/screenshots/
+
+# OS files
+.DS_Store
+Thumbs.db

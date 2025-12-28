@@ -1,0 +1,29 @@
+Subject: GDPR Article 17 - Right to Erasure Request
+
+To Whom It May Concern,
+
+I am writing to request erasure of my personal data pursuant to Article 17
+of the General Data Protection Regulation (GDPR).
+
+I am an EU resident (Netherlands) and request that you:
+
+1. Confirm what personal data you hold about me
+2. Delete all personal data you hold about me
+3. Confirm deletion within 30 days as required by GDPR
+
+My identifying information:
+- Name: {first_name} {last_name}
+- Email: {email}
+- Address: {address}
+{additional_identifiers}
+
+If you require additional information to verify my identity, please contact
+me at the email address above. However, please note that under GDPR Article
+12(6), you may only request additional information where you have reasonable
+doubts concerning identity.
+
+If you do not comply within 30 days, I reserve the right to lodge a complaint
+with the Dutch Data Protection Authority (Autoriteit Persoonsgegevens).
+
+Regards,
+{first_name} {last_name}
