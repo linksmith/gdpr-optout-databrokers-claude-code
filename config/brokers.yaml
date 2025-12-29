@@ -1,0 +1,280 @@
+# Data broker definitions - 40+ brokers organized by tier/priority
+# Claude Code reads this to know which brokers to process
+#
+# TECHNICAL FORM ANALYSIS:
+# As you process each broker, capture technical details in the form_analysis database table.
+# This information will be used in Phase 2+ for full automation.
+#
+# Optional fields for each broker (add as you discover):
+#   form_technical_details:
+#     form_selector: "CSS selector for main form"
+#     field_mappings:
+#       - env_var: FIRST_NAME
+#         selector: "#firstName" or "input[name='fname']"
+#         type: text
+#         required: true
+#       - env_var: EMAIL_REAL
+#         selector: "#email"
+#         type: email
+#         required: true
+#     captcha:
+#       type: recaptcha_v2 | recaptcha_v3 | hcaptcha | none
+#       selector: ".g-recaptcha"
+#     submit_button:
+#       selector: "button[type='submit']"
+#       text: "Submit Request"
+#     delays:
+#       after_page_load: 2000  # milliseconds
+#       between_fields: 500
+#       before_submit: 1000
+#
+brokers:
+
+  # === TIER 1: Major people search sites (priority) ===
+
+  - id: spokeo
+    name: "Spokeo"
+    region: [US, EU]
+    opt_out_url: "https://www.spokeo.com/optout"
+    method: web_form
+    difficulty: easy
+    requires_email_verification: true
+    requires_captcha: false
+    notes: "Search for yourself first, then opt out specific listing"
+    fields:
+      - type: search_self_first
+      - type: listing_url
+      - type: email
+    estimated_time: "3-5 days"
+
+  - id: beenverified
+    name: "BeenVerified"
+    region: [US]
+    opt_out_url: "https://www.beenverified.com/app/optout/search"
+    method: web_form
+    difficulty: medium
+    requires_email_verification: true
+    requires_captcha: sometimes
+    fields:
+      - type: search_self_first
+      - type: first_name
+      - type: last_name
+      - type: state
+      - type: email
+    estimated_time: "24 hours"
+
+  - id: whitepages
+    name: "Whitepages"
+    region: [US]
+    opt_out_url: "https://www.whitepages.com/suppression-requests"
+    method: web_form
+    difficulty: medium
+    requires_email_verification: true
+    requires_captcha: true
+    requires_phone_verification: true
+    notes: "Requires phone call verification"
+    fields:
+      - type: search_self_first
+      - type: listing_url
+      - type: phone_verification
+    estimated_time: "24-48 hours"
+
+  - id: truepeoplesearch
+    name: "TruePeopleSearch"
+    region: [US]
+    opt_out_url: "https://www.truepeoplesearch.com/removal"
+    method: web_form
+    difficulty: easy
+    requires_email_verification: false
+    requires_captcha: true
+    fields:
+      - type: search_self_first
+      - type: record_selection
+    estimated_time: "immediate"
+
+  - id: fastpeoplesearch
+    name: "FastPeopleSearch"
+    region: [US]
+    opt_out_url: "https://www.fastpeoplesearch.com/removal"
+    method: web_form
+    difficulty: easy
+    requires_email_verification: false
+    requires_captcha: true
+    estimated_time: "immediate"
+
+  - id: intelius
+    name: "Intelius"
+    region: [US]
+    opt_out_url: "https://www.intelius.com/opt-out"
+    method: web_form
+    difficulty: medium
+    requires_email_verification: true
+    also_covers: ["instantcheckmate", "ussearch", "peoplefinder"]
+    notes: "One opt-out covers multiple Intelius properties"
+    estimated_time: "7 days"
+
+  - id: radaris
+    name: "Radaris"
+    region: [US, EU]
+    opt_out_url: "https://radaris.com/control/privacy"
+    method: web_form
+    difficulty: hard
+    requires_account: true
+    notes: "Must create account to opt out - use throwaway"
+    estimated_time: "24-48 hours"
+
+  - id: mylife
+    name: "MyLife"
+    region: [US]
+    opt_out_url: "https://www.mylife.com/privacy-policy#cali-access"
+    method: email
+    email_address: "privacy@mylife.com"
+    difficulty: medium
+    notes: "Send GDPR Article 17 request via email"
+    estimated_time: "30 days"
+
+  - id: familytreenow
+    name: "FamilyTreeNow"
+    region: [US]
+    opt_out_url: "https://www.familytreenow.com/optout"
+    method: web_form
+    difficulty: easy
+    requires_captcha: true
+    estimated_time: "immediate"
+
+  - id: thatsthem
+    name: "ThatsThem"
+    region: [US]
+    opt_out_url: "https://thatsthem.com/optout"
+    method: web_form
+    difficulty: easy
+    requires_email_verification: true
+    estimated_time: "24-48 hours"
+
+  # === TIER 2: European data brokers ===
+
+  - id: 192_com
+    name: "192.com"
+    region: [UK]
+    opt_out_url: "https://www.192.com/optout/"
+    method: web_form
+    difficulty: easy
+    estimated_time: "7 days"
+
+  - id: infobel
+    name: "Infobel"
+    region: [EU]
+    opt_out_url: "https://www.infobel.com/en/privacy"
+    method: email
+    email_address: "privacy@infobel.com"
+    difficulty: medium
+    notes: "GDPR request via email, covers multiple EU countries"
+    estimated_time: "30 days"
+
+  - id: yasni
+    name: "Yasni"
+    region: [EU, DE]
+    opt_out_url: "https://www.yasni.com/privacy"
+    method: web_form
+    difficulty: medium
+    estimated_time: "7 days"
+
+  # === TIER 3: Professional/business databases ===
+
+  - id: zoominfo
+    name: "ZoomInfo"
+    region: [US, EU]
+    opt_out_url: "https://www.zoominfo.com/about-zoominfo/privacy-manage-profile"
+    method: web_form
+    difficulty: easy
+    notes: "Professional/business data focus"
+    estimated_time: "30 days"
+
+  - id: apollo
+    name: "Apollo.io"
+    region: [US, EU]
+    opt_out_url: "https://www.apollo.io/privacy-policy/remove/"
+    method: web_form
+    difficulty: easy
+    estimated_time: "30 days"
+
+  - id: lusha
+    name: "Lusha"
+    region: [US, EU]
+    opt_out_url: "https://www.lusha.com/opt-out/"
+    method: web_form
+    difficulty: easy
+    estimated_time: "30 days"
+
+  - id: rocketreach
+    name: "RocketReach"
+    region: [US, EU]
+    opt_out_url: "https://rocketreach.co/person/request_removal"
+    method: web_form
+    difficulty: easy
+    estimated_time: "7 days"
+
+  # === TIER 4: Background check services ===
+
+  - id: checkr
+    name: "Checkr"
+    region: [US]
+    opt_out_url: "https://candidate.checkr.com/privacy/delete"
+    method: web_form
+    difficulty: medium
+    notes: "Employment background checks"
+    estimated_time: "45 days"
+
+  - id: lexisnexis
+    name: "LexisNexis"
+    region: [US, EU]
+    opt_out_url: "https://optout.lexisnexis.com/"
+    method: web_form
+    difficulty: hard
+    requires_id_upload: true
+    notes: "Skip if uncomfortable uploading ID - flag for manual email instead"
+    alternative_method: "Send GDPR request to privacy@lexisnexis.com"
+    estimated_time: "30 days"
+
+  # === TIER 5: Aggregators and lesser-known ===
+
+  - id: peekyou
+    name: "PeekYou"
+    region: [US]
+    opt_out_url: "https://www.peekyou.com/about/contact/optout"
+    method: web_form
+    difficulty: medium
+    estimated_time: "7 days"
+
+  - id: cyberbackgroundchecks
+    name: "CyberBackgroundChecks"
+    region: [US]
+    opt_out_url: "https://www.cyberbackgroundchecks.com/removal"
+    method: web_form
+    difficulty: easy
+    estimated_time: "immediate"
+
+  - id: publicrecordsnow
+    name: "PublicRecordsNow"
+    region: [US]
+    opt_out_url: "https://www.publicrecordsnow.com/static/view/optout"
+    method: web_form
+    difficulty: easy
+    estimated_time: "immediate"
+
+  - id: peoplelooker
+    name: "PeopleLooker"
+    region: [US]
+    opt_out_url: "https://www.peoplelooker.com/f/optout/search"
+    method: web_form
+    difficulty: medium
+    requires_email_verification: true
+    estimated_time: "24-48 hours"
+
+  - id: voterrecords
+    name: "VoterRecords.com"
+    region: [US]
+    opt_out_url: "https://voterrecords.com/optout"
+    method: web_form
+    difficulty: easy
+    estimated_time: "24-48 hours"
