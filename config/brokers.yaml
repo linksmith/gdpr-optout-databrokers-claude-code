@@ -5,6 +5,12 @@
 # As you process each broker, capture technical details in the form_analysis database table.
 # This information will be used in Phase 2+ for full automation.
 #
+# CAPTCHA METADATA (Phase 2A):
+# Added fields for automated CAPTCHA solving:
+#   captcha_type: recaptcha_v2 | recaptcha_v3 | hcaptcha | turnstile | none
+#   captcha_api_compatible: true | false (can it be solved via API?)
+#   captcha_sitekey: "6LeXXXXXXXXXXXXXXXXXXXXXXXXX" (cached for faster solving)
+#
 # Optional fields for each broker (add as you discover):
 #   form_technical_details:
 #     form_selector: "CSS selector for main form"
@@ -20,6 +26,7 @@
 #     captcha:
 #       type: recaptcha_v2 | recaptcha_v3 | hcaptcha | none
 #       selector: ".g-recaptcha"
+#       sitekey: "6LeXXXXXXXXXX"  # Cache this to avoid re-detection
 #     submit_button:
 #       selector: "button[type='submit']"
 #       text: "Submit Request"
@@ -55,6 +62,8 @@ brokers:
     difficulty: medium
     requires_email_verification: true
     requires_captcha: sometimes
+    captcha_type: recaptcha_v2
+    captcha_api_compatible: true
     fields:
       - type: search_self_first
       - type: first_name
@@ -62,6 +71,7 @@ brokers:
       - type: state
       - type: email
     estimated_time: "24 hours"
+    notes: "reCAPTCHA v2 appears occasionally, API solve ~15-30s if present"
 
   - id: whitepages
     name: "Whitepages"
@@ -71,8 +81,10 @@ brokers:
     difficulty: medium
     requires_email_verification: true
     requires_captcha: true
+    captcha_type: recaptcha_v2
+    captcha_api_compatible: true
     requires_phone_verification: true
-    notes: "Requires phone call verification"
+    notes: "Requires phone call verification + reCAPTCHA v2, API solve ~15-30s"
     fields:
       - type: search_self_first
       - type: listing_url
@@ -87,10 +99,13 @@ brokers:
     difficulty: easy
     requires_email_verification: false
     requires_captcha: true
+    captcha_type: recaptcha_v2
+    captcha_api_compatible: true
     fields:
       - type: search_self_first
       - type: record_selection
     estimated_time: "immediate"
+    notes: "reCAPTCHA v2 appears after record selection, API solve ~15-30s"
 
   - id: fastpeoplesearch
     name: "FastPeopleSearch"
@@ -100,7 +115,10 @@ brokers:
     difficulty: easy
     requires_email_verification: false
     requires_captcha: true
+    captcha_type: recaptcha_v2
+    captcha_api_compatible: true
     estimated_time: "immediate"
+    notes: "reCAPTCHA v2 required, API solve ~15-30s"
 
   - id: intelius
     name: "Intelius"
@@ -140,7 +158,10 @@ brokers:
     method: web_form
     difficulty: easy
     requires_captcha: true
+    captcha_type: recaptcha_v2
+    captcha_api_compatible: true
     estimated_time: "immediate"
+    notes: "Simple form with reCAPTCHA v2, API solve ~15-30s"
 
   - id: thatsthem
     name: "ThatsThem"

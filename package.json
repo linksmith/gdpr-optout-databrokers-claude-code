@@ -1,0 +1,48 @@
+{
+  "name": "gdpr-optout-databrokers",
+  "version": "2.0.0",
+  "description": "GDPR Data Broker Opt-Out Automation Tool (Phase 2 - Standalone + Claude Code)",
+  "main": "utils/captcha-solver.js",
+  "bin": {
+    "gdpr-optout": "./src/automation/gdpr-optout-bot.js"
+  },
+  "scripts": {
+    "test": "mocha test/e2e/**/*.test.js --timeout 120000",
+    "test:captcha": "mocha test/e2e/captcha-solver.test.js --timeout 60000",
+    "test:bot": "mocha test/e2e/automation-bot.test.js --timeout 120000",
+    "test:mock-server": "node test/mocks/2captcha-mock-server.js",
+    "test:manual-captcha": "node utils/test-captcha-solver.js",
+    "init:db": "sqlite3 data/submissions.db < data/schema.sql",
+    "migrate:db": "sqlite3 data/submissions.db < data/migrations/001_add_captcha_tracking.sql",
+    "bot": "node src/automation/gdpr-optout-bot.js",
+    "bot:dry-run": "node src/automation/gdpr-optout-bot.js --dry-run",
+    "bot:auto": "node src/automation/gdpr-optout-bot.js --mode=auto",
+    "bot:hybrid": "node src/automation/gdpr-optout-bot.js --mode=hybrid"
+  },
+  "keywords": [
+    "gdpr",
+    "privacy",
+    "data-broker",
+    "opt-out",
+    "automation",
+    "captcha",
+    "puppeteer"
+  ],
+  "author": "Jeremy",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "js-yaml": "^4.1.0",
+    "puppeteer": "^22.0.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "mocha": "^10.3.0",
+    "node-fetch": "^2.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
