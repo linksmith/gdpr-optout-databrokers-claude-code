@@ -23,6 +23,11 @@ Using Claude Code's `--chrome` extension, you engage in conversational sessions 
 - **Evidence Collection**: Automatic screenshot capture for GDPR compliance
 - **Email Alias Support**: Generate unique aliases per broker to track data leaks
 - **Technical Form Capture**: Record form structure and selectors for future full automation
+- **🆕 CAPTCHA Automation (Phase 2A)**: Automated CAPTCHA solving via 2Captcha API
+  - Hybrid mode: API solves automatically, falls back to manual if needed
+  - Cost: ~$0.05/year for 40 brokers
+  - Supports reCAPTCHA v2/v3, hCaptcha, Cloudflare Turnstile
+  - 95-99% success rate, 15-40s solve time
 
 ## Quick Start
 

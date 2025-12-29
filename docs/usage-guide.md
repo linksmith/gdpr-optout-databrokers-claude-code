@@ -99,6 +99,129 @@ cat config/brokers.yaml | grep "name:"
 
 This shows all 26+ configured brokers.
 
+### Step 5: Configure CAPTCHA API (Phase 2A - Optional but Recommended)
+
+**Phase 2A adds automated CAPTCHA solving** to eliminate manual intervention.
+
+#### Why Use CAPTCHA API?
+
+- **60% of brokers require CAPTCHA** (mostly reCAPTCHA v2)
+- **Manual solving is tedious**: ~20 minutes per run
+- **API cost is negligible**: ~$0.05/year for 40 brokers
+- **Saves massive time**: 20 min → 0 min per run
+
+#### Setup 2Captcha API
+
+**1. Sign up for 2Captcha:**
+
+Visit https://2captcha.com and create an account.
+
+**2. Add funds:**
+
+- Minimum: $5 (lasts for ~5,000 CAPTCHAs)
+- For this project: $5 will last several years
+- Cost: $1.00 per 1,000 reCAPTCHA v2 solves
+
+**3. Get your API key:**
+
+- Login to 2Captcha dashboard
+- Navigate to Settings → API Key
+- Copy your API key
+
+**4. Add to .env file:**
+
+Edit your `.env` file and add:
+
+```bash
+# === CAPTCHA SOLVING (Phase 2A) ===
+CAPTCHA_ENABLED=true
+CAPTCHA_API_PROVIDER=2captcha
+CAPTCHA_API_KEY=your_api_key_here
+```
+
+**5. Verify configuration:**
+
+```bash
+# Install dependencies (if not already done)
+npm install
+
+# Test CAPTCHA solver
+node utils/test-captcha-solver.js
+```
+
+This will:
+- Validate your API configuration
+- Check your 2Captcha balance
+- Test CAPTCHA detection on a real broker
+- Demonstrate automated solving
+
+#### How It Works
+
+**Hybrid Mode** (recommended):
+1. Automation fills form up to CAPTCHA
+2. CAPTCHA API solves automatically (15-40s)
+3. If API fails, you're asked to solve manually
+4. Automation continues after CAPTCHA is solved
+
+**Manual Mode** (if CAPTCHA_ENABLED=false):
+1. Automation fills form up to CAPTCHA
+2. Pauses and asks you to solve
+3. You solve in browser
+4. Type "done" to continue
+
+#### Supported CAPTCHA Types
+
+- ✅ **reCAPTCHA v2** (checkbox + image challenges) - 95-99% success rate
+- ✅ **reCAPTCHA v3** (invisible, score-based) - 85-95% success rate
+- ✅ **hCaptcha** - 90-98% success rate
+- ✅ **Cloudflare Turnstile** - 85-95% success rate
+
+#### Cost Breakdown
+
+For your 40-broker list:
+
+| Scenario | CAPTCHA Count | Cost |
+|----------|---------------|------|
+| One run | ~25 CAPTCHAs | $0.025 |
+| Annual (2 runs) | ~50 CAPTCHAs | $0.05 |
+| 10 years | ~500 CAPTCHAs | $0.50 |
+
+**Verdict**: Essentially free for massive time savings.
+
+#### Checking Your Balance
+
+```bash
+node -e "require('./utils/captcha-solver').getBalance().then(b => console.log('Balance: $' + b))"
+```
+
+Or during a session, ask Claude:
+```
+User: "What's my CAPTCHA API balance?"
+Claude: [Checks and reports balance]
+```
+
+#### Troubleshooting CAPTCHA API
+
+**"CAPTCHA_API_KEY not set"**
+- Edit `.env` file
+- Set `CAPTCHA_API_KEY=your_key_here`
+- Ensure `CAPTCHA_ENABLED=true`
+
+**"Insufficient balance"**
+- Add funds at https://2captcha.com
+- Minimum $1 recommended
+
+**"API solve failed"**
+- Check internet connection
+- Verify API key is correct
+- Check 2Captcha service status
+- System will fall back to manual solving
+
+**"Solve taking too long"**
+- Normal solve time: 15-40s
+- High traffic: up to 60s
+- If timeout (>200s), falls back to manual
+
 ---
 
 ## Starting a Session

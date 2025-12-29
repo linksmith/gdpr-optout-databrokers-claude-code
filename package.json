@@ -1,0 +1,32 @@
+{
+  "name": "gdpr-optout-databrokers",
+  "version": "2.0.0",
+  "description": "GDPR Data Broker Opt-Out Automation Tool (Phase 2A - with CAPTCHA solving)",
+  "main": "utils/captcha-solver.js",
+  "scripts": {
+    "test:captcha": "node utils/test-captcha-solver.js",
+    "init:db": "sqlite3 data/submissions.db < data/schema.sql",
+    "migrate:db": "sqlite3 data/submissions.db < data/migrations/001_add_captcha_tracking.sql"
+  },
+  "keywords": [
+    "gdpr",
+    "privacy",
+    "data-broker",
+    "opt-out",
+    "automation",
+    "captcha"
+  ],
+  "author": "Jeremy",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "puppeteer": "^22.0.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
