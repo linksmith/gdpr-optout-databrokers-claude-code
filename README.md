@@ -1,10 +1,22 @@
 # GDPR Data Broker Opt-Out Automation Tool
 
-An interactive tool powered by Claude Code that automates the tedious process of submitting GDPR/opt-out requests to data brokers. Designed for investigative journalists and privacy-conscious individuals who need to reduce their public data footprint.
+**Two ways to automate**: Interactive conversational tool (Claude Code) OR standalone batch automation (Node.js bot). Choose your workflow based on needs.
 
-## Overview
+Designed for investigative journalists and privacy-conscious individuals who need to remove their data from 40+ data brokers.
 
-Using Claude Code's `--chrome` extension, you engage in conversational sessions where Claude navigates to data broker sites, analyzes opt-out forms, fills them with your information, and guides you through the submission process.
+## 🎯 Two Workflows
+
+### Phase 1: Claude Code (Interactive Data Collection)
+Conversational AI guides you through each broker while **collecting technical form metadata** for future automation.
+
+**Use for**: First-time setup, discovering form structures, complex edge cases
+
+### Phase 2: Standalone Bot (Automated Batch Processing)
+Independent Node.js app processes all brokers automatically using pre-collected metadata. **No Claude Code required**.
+
+**Use for**: Repeat runs, scaling, unattended processing
+
+**See**: `docs/phase-1-vs-phase-2-workflows.md` for complete comparison
 
 ### Design Principles
 
@@ -31,38 +43,50 @@ Using Claude Code's `--chrome` extension, you engage in conversational sessions 
 
 ## Quick Start
 
-### Prerequisites
+### Common Setup
 
-- Claude Code installed (`npm install -g @anthropic-ai/claude-code`)
-- Chrome browser installed
-- Basic familiarity with command line
-
-### Initial Setup (5 minutes)
-
-1. **Clone or download this repository**
-
-2. **Create your personal .env file**
+1. **Clone and configure**
    ```bash
+   git clone <repo>
+   cd gdpr-optout-databrokers-claude-code
+   npm install
    cp .env.template .env
    chmod 600 .env
-   # Edit .env and fill in your real information
+   # Edit .env with your personal data
    ```
 
-   **CRITICAL**: Never commit the `.env` file! It contains your personal data.
-
-3. **Verify the database exists**
+2. **Initialize database**
    ```bash
-   ls data/submissions.db
-   ```
-   The database is pre-initialized and ready to use.
-
-4. **Launch Claude Code**
-   ```bash
-   claude --chrome
+   npm run init:db
    ```
 
-5. **Start processing**
-   Say: "Let's process FamilyTreeNow" (easy first test)
+### Phase 1: Start with Claude Code
+
+```bash
+claude --chrome
+```
+
+Then say: "Let's process TruePeopleSearch"
+
+Claude will guide you conversationally through the process.
+
+### Phase 2: Run Standalone Bot
+
+```bash
+# Dry run (test mode)
+npm run bot:dry-run
+
+# Hybrid mode (recommended)
+npm run bot:hybrid
+
+# Full auto mode
+npm run bot:auto
+
+# Specific brokers
+node src/automation/gdpr-optout-bot.js --brokers=spokeo,beenverified
+```
+
+**See**: `docs/phase-1-vs-phase-2-workflows.md` for detailed instructions
 
 ## Directory Structure
 
