@@ -577,6 +577,33 @@ Claude: [Adds note to database]
 
 Use this info for GDPR complaints.
 
+### 9. Capture Technical Form Details (Phase 2 Prep)
+
+As you process brokers, capture technical form information for future full automation:
+
+```
+User: "Before submitting to Spokeo, analyze and store the technical form details"
+
+Claude: [Inspects page structure, captures form selectors, field mappings, CAPTCHA details]
+        [Stores in form_analysis database table]
+```
+
+**What gets captured:**
+- Form selectors (CSS/XPath)
+- Field mappings to .env variables
+- CAPTCHA type and selectors
+- Submit button selectors
+- Required timing delays
+- Multi-step workflow details
+
+**Why capture this:**
+- Enables full automation in Phase 2+
+- Creates a knowledge base of working selectors
+- Helps detect when brokers change their forms
+- Allows sharing findings with others
+
+See `docs/technical-form-analysis-guide.md` for complete details on what to capture and how.
+
 ---
 
 ## Advanced Usage
@@ -619,6 +646,47 @@ sqlite3 data/submissions.db "SELECT broker_id, error_message FROM submissions WH
 # Count by status
 sqlite3 data/submissions.db "SELECT status, COUNT(*) FROM submissions GROUP BY status;"
 ```
+
+### Export Form Analysis Data
+
+Export captured technical form details for automation:
+
+```bash
+# View statistics about captured forms
+python scripts/export_form_analysis.py --format stats
+
+# Export all form analysis as JSON
+python scripts/export_form_analysis.py --format json > form_analysis_export.json
+
+# Export automation-ready config (only known-working forms)
+python scripts/export_form_analysis.py --format automation > automation_config.json
+
+# Export specific broker
+python scripts/export_form_analysis.py --broker spokeo --format json
+
+# Export as markdown table for documentation
+python scripts/export_form_analysis.py --format markdown > docs/form-status.md
+
+# Export to file
+python scripts/export_form_analysis.py --format json --output exports/forms.json
+```
+
+**Example output (stats):**
+```
+Form Analysis Statistics
+==================================================
+Total brokers analyzed: 15
+Known working: 12 (80.0%)
+With CAPTCHA: 8
+Multi-step forms: 3
+
+CAPTCHA Types:
+  - recaptcha_v2: 5
+  - recaptcha_v3: 2
+  - hcaptcha: 1
+```
+
+See `docs/technical-form-analysis-guide.md` for complete documentation.
 
 ---
 

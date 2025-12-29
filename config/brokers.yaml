@@ -1,5 +1,33 @@
 # Data broker definitions - 40+ brokers organized by tier/priority
 # Claude Code reads this to know which brokers to process
+#
+# TECHNICAL FORM ANALYSIS:
+# As you process each broker, capture technical details in the form_analysis database table.
+# This information will be used in Phase 2+ for full automation.
+#
+# Optional fields for each broker (add as you discover):
+#   form_technical_details:
+#     form_selector: "CSS selector for main form"
+#     field_mappings:
+#       - env_var: FIRST_NAME
+#         selector: "#firstName" or "input[name='fname']"
+#         type: text
+#         required: true
+#       - env_var: EMAIL_REAL
+#         selector: "#email"
+#         type: email
+#         required: true
+#     captcha:
+#       type: recaptcha_v2 | recaptcha_v3 | hcaptcha | none
+#       selector: ".g-recaptcha"
+#     submit_button:
+#       selector: "button[type='submit']"
+#       text: "Submit Request"
+#     delays:
+#       after_page_load: 2000  # milliseconds
+#       between_fields: 500
+#       before_submit: 1000
+#
 brokers:
 
   # === TIER 1: Major people search sites (priority) ===

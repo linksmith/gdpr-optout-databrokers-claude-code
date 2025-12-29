@@ -22,6 +22,7 @@ Using Claude Code's `--chrome` extension, you engage in conversational sessions 
 - **State Tracking**: SQLite database tracks progress across sessions
 - **Evidence Collection**: Automatic screenshot capture for GDPR compliance
 - **Email Alias Support**: Generate unique aliases per broker to track data leaks
+- **Technical Form Capture**: Record form structure and selectors for future full automation
 
 ## Quick Start
 
@@ -62,20 +63,23 @@ Using Claude Code's `--chrome` extension, you engage in conversational sessions 
 
 ```
 gdpr-optout-databrokers/
-├── README.md                     # This file
-├── .env                          # Your personal data (gitignored!)
-├── .env.template                 # Template for setup
-├── .gitignore                    # Ensures .env stays private
+├── README.md                              # This file
+├── .env                                   # Your personal data (gitignored!)
+├── .env.template                          # Template for setup
+├── .gitignore                             # Ensures .env stays private
 ├── config/
-│   └── brokers.yaml              # 40+ broker definitions
+│   └── brokers.yaml                       # 40+ broker definitions
 ├── data/
-│   ├── submissions.db            # SQLite tracking database
-│   └── screenshots/              # Evidence screenshots
+│   ├── submissions.db                     # SQLite tracking database (4 tables)
+│   └── screenshots/                       # Evidence screenshots
 ├── docs/
-│   ├── gdpr-optout-prd.md        # Full product requirements
-│   └── usage-guide.md            # Detailed usage instructions
+│   ├── gdpr-optout-prd.md                 # Full product requirements
+│   ├── usage-guide.md                     # Detailed usage instructions
+│   └── technical-form-analysis-guide.md   # Guide for capturing form details
+├── scripts/
+│   └── export_form_analysis.py            # Export form analysis data
 └── templates/
-    └── gdpr_request.txt          # GDPR Article 17 email template
+    └── gdpr_request.txt                   # GDPR Article 17 email template
 ```
 
 ## Usage Examples
@@ -159,6 +163,58 @@ Claude: [Marks as skipped with note]
 6. **End session**: "I need to stop" (progress auto-saved)
 7. **Resume later**: "Continue where we left off"
 
+## Technical Form Analysis (Phase 2 Preparation)
+
+While processing brokers, you can capture technical details about each form for future full automation:
+
+### Capturing Form Details
+
+During a session, ask Claude to analyze and store form structure:
+
+```
+User: "Before submitting to Spokeo, please analyze and store the technical form details"
+Claude: [Inspects page, captures form selectors, field mappings, CAPTCHA type, etc.]
+        [Stores in form_analysis database table]
+```
+
+### What Gets Captured
+
+- **Form structure**: Selectors for form, fields, submit button
+- **Field mappings**: Which .env variables map to which form fields
+- **CAPTCHA details**: Type (reCAPTCHA v2/v3, hCaptcha) and selectors
+- **Workflow**: Multi-step forms, search-first requirements
+- **Timing**: Required delays to avoid anti-bot detection
+- **Confirmation**: How to detect successful submission
+
+### Exporting Form Analysis
+
+Export captured technical details for automation:
+
+```bash
+# Export all form analysis as JSON
+python scripts/export_form_analysis.py --format json
+
+# Export specific broker
+python scripts/export_form_analysis.py --broker spokeo --format automation
+
+# View statistics
+python scripts/export_form_analysis.py --format stats
+
+# Export as markdown table
+python scripts/export_form_analysis.py --format markdown > docs/form-status.md
+```
+
+### Documentation
+
+See `docs/technical-form-analysis-guide.md` for:
+- Complete field reference
+- How to capture technical details
+- Browser DevTools tips
+- Example form analysis records
+- Database schema
+
+This data will enable fully automated form filling in Phase 2+.
+
 ## Maintenance
 
 ### Re-running After 6-12 Months
@@ -178,6 +234,7 @@ Edit `config/brokers.yaml` and add new broker definitions. No code changes neede
 
 - **Full PRD**: See `docs/gdpr-optout-prd.md` for complete product requirements
 - **Usage Guide**: See `docs/usage-guide.md` for detailed usage instructions
+- **Technical Form Analysis**: See `docs/technical-form-analysis-guide.md` for capturing form details
 - **GDPR Template**: See `templates/gdpr_request.txt` for email-based requests
 
 ## GDPR Enforcement
