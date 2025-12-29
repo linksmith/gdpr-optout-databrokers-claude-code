@@ -87,7 +87,7 @@ class GDPROptOutBot {
         this.log('   Falling back to manual CAPTCHA solving\n');
       } else {
         const balance = await getBalance();
-        this.log(`✅ CAPTCHA API: Configured (balance: $${balance?.toFixed(2) || 'unknown'})\n');
+        this.log(`✅ CAPTCHA API: Configured (balance: $${balance?.toFixed(2) || 'unknown'})\n`);
       }
     } else {
       this.log('ℹ️  CAPTCHA API: Disabled (manual solving only)\n');

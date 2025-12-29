@@ -206,7 +206,7 @@ describe('CAPTCHA Solver E2E Tests', function() {
 
       // Check result (should be solved)
       const resultResp = await fetch(
-        `http://localhost:3001/res.php?key=test_api_key_123&action=get&id=${taskId}&json=1'
+        `http://localhost:3001/res.php?key=test_api_key_123&action=get&id=${taskId}&json=1`
       );
       const resultData = await resultResp.json();
 
