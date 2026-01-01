@@ -115,3 +115,25 @@ To improve:
 - Use when rebrowser-playwright fails against specific advanced anti-bot
 
 **The stealth tax is very low** - you get significantly better bot detection evasion with almost no performance cost.
+
+## Stealth Implementation Notes
+
+### rebrowser-playwright (Recommended)
+- ✅ **navigator.webdriver properly hidden** - returns `undefined` (not detected as automation)
+- ✅ All stealth tests passing
+- ✅ Page.evaluate() and page.setContent() work correctly
+- ✅ Supports multiple concurrent pages without issues
+- Implementation: Wraps browser.newPage() to apply addInitScript() for navigator.webdriver removal
+
+### patchright (Known Limitations)
+- ⚠️ **navigator.webdriver limitation** - Patchright's persistent context sets `navigator.webdriver = false` by default
+- ⚠️ `addInitScript()` doesn't persist across navigations in persistent contexts
+- ⚠️ Direct override via `page.evaluate()` works but must be manually called after each navigation
+- Recommendation: Use rebrowser-playwright unless you specifically need Patchright's source-level patches for advanced anti-bot systems
+
+### Implementation Status (Phase 2B)
+- [x] Multi-stealth browser factory with env variable toggle
+- [x] rebrowser-playwright: Full stealth working (navigator.webdriver hidden)
+- [x] patchright: Partial stealth (requires manual intervention for navigator.webdriver)
+- [x] E2E tests for all browser operations
+- [x] Performance benchmarks completed

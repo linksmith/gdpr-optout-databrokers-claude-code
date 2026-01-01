@@ -85,13 +85,31 @@ async function createPuppeteerBrowser(options) {
 async function createRebrowserPlaywrightBrowser(options) {
   const { chromium } = require('rebrowser-playwright');
 
-  // Enable rebrowser patches via environment variable
-  process.env.REBROWSER_PATCHES_RUNTIME_FIX_MODE = 'alwaysIsolatedContext';
+  // Disable problematic runtime fix to avoid auxData errors
+  // The patches will still work for stealth, but without breaking page.evaluate()
+  delete process.env.REBROWSER_PATCHES_RUNTIME_FIX_MODE;
 
   const browser = await chromium.launch({
     headless: options.headless,
     args: options.args
   });
+
+  // Wrap browser to add init script on page creation
+  const originalNewPage = browser.newPage.bind(browser);
+  browser.newPage = async (...args) => {
+    const page = await originalNewPage(...args);
+
+    // Inject script to remove navigator.webdriver
+    await page.addInitScript(() => {
+      delete Object.getPrototypeOf(navigator).webdriver;
+      Object.defineProperty(navigator, 'webdriver', {
+        get: () => undefined,
+        configurable: true
+      });
+    });
+
+    return page;
+  };
 
   return { browser, mode: 'rebrowser-playwright' };
 }
@@ -113,14 +131,41 @@ async function createPatchrightBrowser(options) {
     // Directory might already exist
   }
 
+  // Enhanced args for better stealth with Patchright
+  const patchrightArgs = [
+    ...options.args,
+    '--disable-blink-features=AutomationControlled',
+    '--exclude-switches=enable-automation',
+    '--disable-dev-shm-usage'
+  ];
+
   const browser = await chromium.launchPersistentContext(userDataDir, {
     headless: options.headless,
-    args: options.args,
+    args: patchrightArgs,
     viewport: { width: 1920, height: 1080 },
     ignoreHTTPSErrors: true,
     // Patchright-specific: use real Chrome user agent
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    // Additional stealth settings
+    locale: 'en-US',
+    timezoneId: 'America/New_York',
+    permissions: [],
+    // IMPORTANT: This helps hide automation signals
+    bypassCSP: false
   });
+
+  // Stealth script to override Patchright's navigator.webdriver = false
+  const stealthScriptFunc = () => {
+    Object.defineProperty(Object.getPrototypeOf(navigator), 'webdriver', {
+      get: () => undefined,
+      configurable: true,
+      enumerable: true
+    });
+  };
+
+  // Apply init script at CONTEXT level (persistent context)
+  // This should affect all pages and all navigations
+  await browser.addInitScript(stealthScriptFunc);
 
   // For Patchright persistent context, browser IS the context
   // Wrap it to provide .newPage() method for compatibility
@@ -128,10 +173,21 @@ async function createPatchrightBrowser(options) {
     newPage: async () => {
       // In persistent context, pages already exist or we create new ones
       const pages = browser.pages();
+      let page;
+
       if (pages.length > 0) {
-        return pages[0];
+        page = pages[0];
+        // For existing pages, apply fix immediately since they're already loaded
+        try {
+          await page.evaluate(stealthScriptFunc);
+        } catch (e) {
+          // Page might not be ready
+        }
+      } else {
+        page = await browser.newPage();
       }
-      return browser.newPage();
+
+      return page;
     },
     close: () => browser.close(),
     pages: () => browser.pages(),
