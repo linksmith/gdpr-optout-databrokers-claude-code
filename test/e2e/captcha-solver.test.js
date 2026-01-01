@@ -1,17 +1,19 @@
 /**
- * E2E Tests for CAPTCHA Solver Module
+ * E2E Tests for CAPTCHA Solver Module (Phase 2B)
  *
- * Tests integration with mock 2Captcha API server
+ * Tests integration with mock 2Captcha API server.
+ * Compatible with all stealth modes (puppeteer, rebrowser-playwright, patchright).
  */
 
 const assert = require('assert');
 const Mock2CaptchaServer = require('../mocks/2captcha-mock-server');
-const puppeteer = require('puppeteer');
+const { createBrowser } = require('../../utils/browser-factory');
 
 // Mock environment for testing
 process.env.CAPTCHA_ENABLED = 'true';
 process.env.CAPTCHA_API_PROVIDER = '2captcha';
 process.env.CAPTCHA_API_KEY = 'test_api_key_123';
+process.env.STEALTH_MODE = process.env.STEALTH_MODE || 'rebrowser-playwright';
 
 describe('CAPTCHA Solver E2E Tests', function() {
   this.timeout(60000); // 60 second timeout for E2E tests
@@ -43,8 +45,9 @@ describe('CAPTCHA Solver E2E Tests', function() {
     // Reset mock server stats
     await fetch('http://localhost:3001/reset');
 
-    // Launch browser
-    browser = await puppeteer.launch({ headless: true });
+    // Launch browser with configured stealth mode
+    const { browser: browserInstance } = await createBrowser({ headless: true });
+    browser = browserInstance;
     page = await browser.newPage();
   });
 

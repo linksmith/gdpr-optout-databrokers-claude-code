@@ -23,8 +23,6 @@
  *   node src/automation/gdpr-optout-bot.js --dry-run
  */
 
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const fs = require('fs').promises;
 const path = require('path');
 const yaml = require('js-yaml');
@@ -32,11 +30,11 @@ const sqlite3 = require('sqlite3');
 const { promisify } = require('util');
 const readline = require('readline');
 
+// Import browser factory (Phase 2B - Multi-stealth architecture)
+const { createBrowser, getStealthMode, validateStealthConfig } = require('../../utils/browser-factory');
+
 // Import CAPTCHA solver
 const { detectCaptcha, solveCaptcha, getBalance, validateConfig } = require('../../utils/captcha-solver');
-
-// Use stealth plugin
-puppeteer.use(StealthPlugin());
 
 // Load environment variables
 require('dotenv').config();
@@ -69,6 +67,13 @@ class GDPROptOutBot {
 
   async init() {
     this.log('🚀 Initializing GDPR Opt-Out Bot...\n');
+
+    // Validate stealth configuration
+    const stealthValidation = validateStealthConfig();
+    if (!stealthValidation.valid) {
+      throw new Error(stealthValidation.message);
+    }
+    this.log(`🛡️  Stealth Mode: ${getStealthMode()}\n`);
 
     // Load configuration
     await this.loadConfig();
@@ -150,27 +155,29 @@ class GDPROptOutBot {
   async launchBrowser() {
     this.log('🌐 Launching browser...');
 
-    this.browser = await puppeteer.launch({
-      headless: this.options.headless,
-      args: [
-        '--disable-blink-features=AutomationControlled',
-        '--no-sandbox',
-        '--disable-dev-shm-usage',
-        '--window-size=1920,1080'
-      ]
+    const { browser, mode } = await createBrowser({
+      headless: this.options.headless
     });
 
+    this.browser = browser;
+    this.stealthMode = mode;
     this.page = await this.browser.newPage();
 
-    // Set realistic viewport
-    await this.page.setViewport({ width: 1920, height: 1080 });
+    // Set viewport for Puppeteer and rebrowser-playwright
+    // (Patchright sets this in launchPersistentContext)
+    if (mode !== 'patchright' && this.page.setViewport) {
+      await this.page.setViewport({ width: 1920, height: 1080 });
+    }
 
-    // Set realistic user agent
-    await this.page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
-    );
+    // Set user agent for Puppeteer and rebrowser-playwright
+    // (Patchright sets this in launchPersistentContext)
+    if (mode !== 'patchright' && this.page.setUserAgent) {
+      await this.page.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+      );
+    }
 
-    this.log('   ✅ Browser launched');
+    this.log(`   ✅ Browser launched (${mode})`);
   }
 
   async run() {
