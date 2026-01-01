@@ -10,7 +10,9 @@
  * - hCaptcha
  * - Cloudflare Turnstile
  *
- * Usage with Puppeteer:
+ * Framework-agnostic: Works with Puppeteer, Playwright, and Patchright
+ *
+ * Usage:
  *   const { detectCaptcha, solveCaptcha } = require('./utils/captcha-solver');
  *   const captcha = await detectCaptcha(page);
  *   if (captcha) {
@@ -46,7 +48,7 @@ const API_ENDPOINTS = {
 
 /**
  * Detects CAPTCHA on the current page
- * @param {Page} page - Puppeteer page object
+ * @param {Page} page - Puppeteer/Playwright page object
  * @returns {Object|null} CAPTCHA information or null if not found
  */
 async function detectCaptcha(page) {
@@ -107,7 +109,7 @@ async function detectCaptcha(page) {
 
 /**
  * Solves CAPTCHA using API or manual fallback
- * @param {Page} page - Puppeteer page object
+ * @param {Page} page - Puppeteer/Playwright page object
  * @param {Object} captcha - CAPTCHA information from detectCaptcha()
  * @param {Object} options - Additional options
  * @returns {Object} Solution result

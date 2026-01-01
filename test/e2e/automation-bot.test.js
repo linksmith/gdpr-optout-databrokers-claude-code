@@ -1,7 +1,9 @@
 /**
- * E2E Tests for GDPR Opt-Out Automation Bot
+ * E2E Tests for GDPR Opt-Out Automation Bot (Phase 2B)
  *
- * Tests the complete standalone automation workflow
+ * Tests the complete standalone automation workflow.
+ * Compatible with all stealth modes (puppeteer, rebrowser-playwright, patchright).
+ * Set STEALTH_MODE environment variable to test specific mode.
  */
 
 const assert = require('assert');
@@ -33,6 +35,9 @@ describe('GDPR Opt-Out Bot E2E Tests', function() {
     process.env.CAPTCHA_API_PROVIDER = '2captcha';
     process.env.CAPTCHA_API_KEY = 'test_api_key_123';
     process.env.CAPTCHA_API_BASE_URL = 'http://localhost:3001';
+
+    // Stealth mode for testing (defaults to rebrowser-playwright if not set)
+    process.env.STEALTH_MODE = process.env.STEALTH_MODE || 'rebrowser-playwright';
 
     // Create test .env data
     process.env.FIRST_NAME = 'TestFirstName';

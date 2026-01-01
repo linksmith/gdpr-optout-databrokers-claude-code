@@ -154,6 +154,15 @@ failed/skipped (terminal states)
 2. Add npm script: `"migrate:description": "sqlite3 data/submissions.db < data/migrations/NNN_description.sql"`
 3. Update `data/schema.sql` with same changes (for fresh installs)
 
+### Upgrading Stealth Mode
+
+To migrate from legacy Puppeteer to modern Playwright stealth:
+
+1. Set `STEALTH_MODE=rebrowser-playwright` in `.env` (default)
+2. Bot automatically uses new browser factory
+3. No code changes needed - `page` API is identical
+4. If specific broker fails, try `STEALTH_MODE=patchright` for that run
+
 ## Testing Strategy
 
 **E2E Tests** (`test/e2e/`):
@@ -232,8 +241,38 @@ node src/automation/gdpr-optout-bot.js --brokers=spokeo --dry-run
 
 ## Important Implementation Details
 
-### Puppeteer Stealth Mode
-Bot uses `puppeteer-extra-plugin-stealth` to avoid bot detection. Don't remove this - many brokers actively block automation.
+### Browser Stealth Architecture (2026)
+
+The bot supports **three stealth modes** configurable via `.env` (`STEALTH_MODE`):
+
+**1. `puppeteer` (Legacy - Not Recommended):**
+- Uses `puppeteer-extra-plugin-stealth`
+- Only bypasses basic bot detection
+- Modern anti-bot systems (Cloudflare, DataDome) easily detect the `Runtime.enable` CDP command
+- Keep for backward compatibility only
+
+**2. `rebrowser-playwright` (Recommended - Default):**
+- Uses rebrowser-patches applied to Playwright
+- Runtime-toggleable: can enable/disable patches via environment variable
+- Full main context access
+- Proven undetectable by Cloudflare and DataDome in testing
+- Better maintenance: sustainable release cadence
+- Best for: production use, flexibility, reliability
+
+**3. `patchright` (Maximum Stealth):**
+- Patches Playwright at source level to avoid `Runtime.enable` entirely
+- Supports Closed Shadow DOM access (useful for complex forms)
+- Requires persistent browser contexts for best results
+- Best for: advanced bot detection scenarios, brokers with aggressive anti-bot
+
+**Implementation**: Browser creation abstracted in `utils/browser-factory.js`
+
+**When to Use Each Mode:**
+- **Daily operations**: Use `rebrowser-playwright` (default)
+- **Specific broker fails repeatedly**: Try `patchright` for that broker
+- **Testing/debugging**: Use `puppeteer` only if you need to compare behavior
+
+**Important**: All modes use the same `page` API, so bot code remains framework-agnostic.
 
 ### CAPTCHA Injection Mechanism
 CAPTCHA solutions are injected via `page.evaluate()` setting the `g-recaptcha-response` or `h-captcha-response` fields. Some sites validate differently - check `form_analysis.captcha_selector` for custom injection points.
